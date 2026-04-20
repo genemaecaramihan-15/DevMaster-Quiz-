@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevMaster Quiz</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #eab308;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at top right, #1e1b4b, var(--bg));
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--card);
+            width: 100%;
+            max-width: 450px;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-container {
+            height: 6px;
+            background: #334155;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .header-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        #quit-btn {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        #quit-btn:hover { background: var(--danger); }
+
+        #timer {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--danger);
+        }
+
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: #fff; text-align: center; }
+        h2 { font-size: 1.2rem; margin: 1.5rem 0; min-height: 3rem; text-align: center; }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .start-btn { color: white; margin-bottom: 15px; }
+        .start-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        .main-start-btn {
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            font-size: 1.2rem;
+            padding: 18px;
+            margin-top: 2rem;
+        }
+
+        .answer-btn {
+            background: #334155;
+            color: #cbd5e1;
+            text-align: left;
+            justify-content: flex-start;
+            border: 1px solid transparent;
+        }
+
+        .answer-btn:hover { background: #475569; border-color: var(--primary); }
+        
+        .correct { background: var(--success) !important; color: white; }
+        .wrong { background: var(--danger) !important; color: white; }
+
+        #level-badge {
+            background: var(--primary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+        }
+
+        .screen { display: none; animation: fadeIn 0.4s ease; text-align: center; }
+        .active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-icon { font-size: 4rem; margin-bottom: 1rem; color: #fbbf24; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="welcome" class="screen active">
+        <div class="stat-icon" style="color: var(--primary);"><i class="fas fa-code-branch"></i></div>
+        <h1>DevMaster</h1>
+        <p style="color: #94a3b8;">Ready to test your coding skills?</p>
+        <button class="btn start-btn main-start-btn" onclick="showScreen('home')">
+            START THE GAME <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div id="home" class="screen">
+        <div class="stat-icon"><i class="fas fa-laptop-code"></i></div>
+        <h1>Difficulty</h1>
+        <p style="color: #94a3b8; margin-bottom: 1.5rem;">Pick your challenge level:</p>
+        
+        <button class="btn start-btn" onclick="startGame('easy')" style="background: var(--success);">
+            <i class="fas fa-leaf"></i> EASY MODE
+        </button>
+        <button class="btn start-btn" onclick="startGame('hard')" style="background: var(--warning);">
+            <i class="fas fa-fire"></i> HARD MODE
+        </button>
+        <button class="btn start-btn" onclick="startGame('difficult')" style="background: var(--danger);">
+            <i class="fas fa-skull"></i> DIFFICULT MODE
+        </button>
+    </div>
+
+    <div id="game" class="screen">
+        <div class="top-nav">
+            <button id="quit-btn" onclick="quitToLevels()"><i class="fas fa-times"></i> QUIT</button>
+            <span id="level-badge">Easy</span>
+        </div>
+        
+        <div class="header-meta">
+            <div id="timer"><i class="fas fa-clock"></i> <span id="time-left">30</span>s</div>
+            <div style="font-size: 0.8rem; color: #94a3b8;"><span id="q-count">1</span>/10</div>
+        </div>
+        
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+
+        <h2 id="question">Question text?</h2>
+        <div id="answers"></div>
+    </div>
+
+    <div id="result" class="screen">
+        <div id="result-icon" class="stat-icon">🏆</div>
+        <h2 id="result-title">Congratulations!</h2>
+        <p id="result-text" style="color: #94a3b8; margin-bottom: 2rem;"></p>
+        <button class="btn start-btn" style="background: var(--primary);" onclick="showScreen('home')">
+            <i class="fas fa-redo"></i> PLAY AGAIN
+        </button>
+    </div>
+</div>
+
+<script>
+const quizData = {
+    easy: [
+        {q:"HTML stands for?", a:[{text:"Hyper Text Markup Language",c:true},{text:"High Machine Language"},{text:"Home Tool Language"}]},
+        {q:"Which property changes text color?", a:[{text:"color",c:true},{text:"font-color"},{text:"text-style"}]},
+        {q:"Which tag is for the largest heading?", a:[{text:"<h1>",c:true},{text:"<h6>"},{text:"<head>"}]},
+        {q:"The link tag is?", a:[{text:"<a>",c:true},{text:"<link>"},{text:"<href>"}]},
+        {q:"What does CSS stand for?", a:[{text:"Cascading Style Sheets",c:true},{text:"Creative Style System"},{text:"Colorful Style Sheets"}]},
+        {q:"How do you make a bulleted list?", a:[{text:"<ul>",c:true},{text:"<ol>"},{text:"<li>"}]},
+        {q:"Which tag is used for a line break?", a:[{text:"<br>",c:true},{text:"<lb>"},{text:"<break>"}]},
+        {q:"How do you create a checkbox?", a:[{text:"<input type='checkbox'>",c:true},{text:"<checkbox>"},{text:"<check>"}]},
+        {q:"Which character indicates an end tag?", a:[{text:"/",c:true},{text:"<"},{text:"*"}]},
+        {q:"Attribute used for image source?", a:[{text:"src",c:true},{text:"href"},{text:"link"}]}
+    ],
+    hard: [
+        {q:"Which company created JavaScript?", a:[{text:"Netscape",c:true},{text:"Microsoft"},{text:"Sun Microsystems"}]},
+        {q:"How do you select an ID in CSS?", a:[{text:"#id",c:true},{text:".id"},{text:"@id"}]},
+        {q:"Inside which HTML element do we put JS?", a:[{text:"<script>",c:true},{text:"<javascript>"},{text:"<js>"}]},
+        {q:"Event when a user clicks an element?", a:[{text:"onclick",c:true},{text:"onchange"},{text:"onmouseover"}]},
+        {q:"How to write 'Hello' in alert box?", a:[{text:"alert('Hello')",c:true},{text:"msg('Hello')"},{text:"prompt('Hello')"}]},
+        {q:"Which CSS property controls text size?", a:[{text:"font-size",c:true},{text:"text-style"},{text:"text-size"}]},
+        {q:"How do you call 'myFunction'?", a:[{text:"myFunction()",c:true},{text:"call myFunction"},{text:"func myFunction"}]},
+        {q:"How to write an IF statement in JS?", a:[{text:"if (i == 5)",c:true},{text:"if i = 5 then"},{text:"if i == 5"}]},
+        {q:"Operator used to assign a value?", a:[{text:"=",c:true},{text:"=="},{text:"==="}]},
+        {q:"How do you start a FOR loop?", a:[{text:"for (i=0; i<5; i++)",c:true},{text:"for (i <= 5; i++)"},{text:"for i = 1 to 5"}]}
+    ],
+    difficult: [
+        {q:"How do you convert JSON string to object?", a:[{text:"JSON.parse()",c:true},{text:"JSON.stringify()"},{text:"JSON.toObject()"}]},
+        {q:"Which is a block-level element?", a:[{text:"<div>",c:true},{text:"<span>"},{text:"<a>"}]},
+        {q:"Correct way to write arrow function?", a:[{text:"() => {}",c:true},{text:"() -> {}"},{text:"function => {}"}]},
+        {q:"What is 'this' keyword in JS?", a:[{text:"Refers to the object",c:true},{text:"Refers to the function"},{text:"Refers to the variable"}]},
+        {q:"Method to add element to end of array?", a:[{text:"push()",c:true},{text:"pop()"},{text:"shift()"}]},
+        {q:"What is the output of '2' + 2?", a:[{text:"'22'",c:true},{text:"4"},{text:"NaN"}]},
+        {q:"Which of these is NOT a JS framework?", a:[{text:"Django",c:true},{text:"React"},{text:"Vue"}]},
+        {q:"How do you declare a constant?", a:[{text:"const",c:true},{text:"let"},{text:"var"}]},
+        {q:"What does the 'Box Model' include?", a:[{text:"Margin, Border, Padding",c:true},{text:"Width, Height, Color"},{text:"Font, Background, Border"}]},
+        {q:"CSS property used for Flexbox?", a:[{text:"display: flex",c:true},{text:"flex-direction"},{text:"align-items"}]}
+    ]
+};
+
+let level = "easy";
+let questions = [];
+let index = 0;
+let timer = 30;
+let interval;
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+// NEW: Function to quit back to level selection without refreshing the whole app
+function quitToLevels() {
+    clearInterval(interval);
+    showScreen('home');
+}
+
+function startGame(selectedLevel) {
+    level = selectedLevel;
+    showScreen('game');
+    startLevel();
+}
+
+function startLevel() {
+    questions = quizData[level];
+    index = 0;
+    document.getElementById("level-badge").innerText = level;
+    document.getElementById("level-badge").style.background = 
+        level === 'easy' ? 'var(--success)' : (level === 'hard' ? 'var(--warning)' : 'var(--danger)');
+    
+    updateProgress();
+    startTimer();
+    showQuestion();
+}
+
+function startTimer() {
+    clearInterval(interval);
+    timer = 30;
+    document.getElementById("time-left").innerText = timer;
+    interval = setInterval(() => {
+        timer--;
+        document.getElementById("time-left").innerText = timer;
+        if(timer <= 0) endGame(false, "Time ran out! Be faster next time.");
+    }, 1000);
+}
+
+function updateProgress() {
+    const percent = (index / questions.length) * 100;
+    document.getElementById("progress-bar").style.width = percent + "%";
+    document.getElementById("q-count").innerText = index + 1;
+}
+
+function showQuestion() {
+    let q = questions[index];
+    document.getElementById("question").innerText = q.q;
+    let container = document.getElementById("answers");
+    container.innerHTML = "";
+
+    let shuffledOptions = [...q.a].sort(() => Math.random() - 0.5);
+
+    shuffledOptions.forEach(ans => {
+        let btn = document.createElement("button");
+        btn.className = "btn answer-btn";
+        btn.innerHTML = ans.text;
+        btn.onclick = () => handleAnswer(btn, ans.c);
+        container.appendChild(btn);
+    });
+}
+
+function handleAnswer(selectedBtn, isCorrect) {
+    const allBtns = document.querySelectorAll('.answer-btn');
+    allBtns.forEach(b => b.style.pointerEvents = "none");
+
+    if(isCorrect) {
+        selectedBtn.classList.add('correct');
+        setTimeout(() => {
+            index++;
+            if(index < questions.length) {
+                updateProgress();
+                showQuestion();
+            } else {
+                updateProgress();
+                endGame(true, "You mastered the " + level.toUpperCase() + " challenge!");
+            }
+        }, 600);
+    } else {
+        selectedBtn.classList.add('wrong');
+        setTimeout(() => endGame(false, "Mali! Game Over na."), 600);
+    }
+}
+
+function endGame(win, message) {
+    clearInterval(interval);
+    showScreen('result');
+    document.getElementById("result-icon").innerHTML = win ? "🏆" : "💀";
+    document.getElementById("result-title").innerText = win ? "Congratulations!" : "Game Over";
+    document.getElementById("result-text").innerText = message;
+    document.getElementById("result-icon").style.color = win ? "#fbbf24" : "var(--danger)";
+}
+</script>
+
+</body>
+</html>
